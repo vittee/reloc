@@ -1,0 +1,17 @@
+{
+  "name": "reloc",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "1.1.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  }
+}

@@ -1,0 +1,22 @@
+{
+	"name": "Re-loc bot",
+	"image": "oven/bun:1.1.16-alpine",
+	"remoteUser": "bun",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"installOhMyZsh": true,
+			"installOhMyZshConfig": true,
+			"configureZshAsDefaultShell": true,
+			"username": "bun"
+		}
+	},
+	"postCreateCommand": "git config devcontainers-theme.hide-status 1",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"EditorConfig.EditorConfig"
+			]
+		}
+	}
+}
