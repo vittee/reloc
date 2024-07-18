@@ -1,4 +1,17 @@
-import { ApplicationCommandOptionType, OAuth2Scopes, PermissionFlagsBits, PermissionsBitField, REST, Routes, type APIApplicationCommand, type APIApplicationCommandOption, type APIApplicationCommandSubcommandOption, type RESTGetAPIApplicationCommandsResult, type RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  OAuth2Scopes,
+  PermissionFlagsBits,
+  PermissionsBitField,
+  REST,
+  Routes,
+  type APIApplicationCommand,
+  type APIApplicationCommandOption,
+  type APIApplicationCommandSubcommandOption,
+  type RESTGetAPIApplicationCommandsResult,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody
+} from "discord.js";
+
 import { createCommandDeclarations } from "./command";
 
 export function generateOAuth2Url(clientId: string) {
