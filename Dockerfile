@@ -21,5 +21,9 @@ FROM base AS dist
 COPY --from=install /tmp/prod/node_modules node_modules
 COPY --from=pre /app/package.json /app/src ./
 
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
 USER bun
-ENTRYPOINT [ "bun", "run", "index.ts" ]
+CMD [ "bun", "run", "index.ts" ]
