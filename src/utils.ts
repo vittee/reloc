@@ -44,13 +44,11 @@ function isSubCommandOptionIdentical(a: APIApplicationCommandSubcommandOption, b
 
 function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicationCommandOption[]): boolean {
   if (a.length !== b.length) {
-    console.log('Subcommand mismatch')
     return false;
   }
 
   for (let i = 0; i < a.length; i++) {
     if (a[i].type as any !== b[i].type as any) {
-      console.log('Subcommand type mismatch')
       return false;
     }
 
@@ -66,12 +64,10 @@ function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicati
     }
 
     if (a[i].name !== b[i].name) {
-      console.log('Subcommand name mismatch')
       return false;
     }
 
     if (a[i].description !== b[i].description) {
-      console.log('Subcommand description mismatch')
       return false;
     }
   }
@@ -81,17 +77,14 @@ function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicati
 
 function isCmdIdentical(a: APIApplicationCommand, b: RESTPostAPIChatInputApplicationCommandsJSONBody): boolean {
   if (a.type as any !== b.type as any) {
-    console.log('Type mismatch')
     return false;
   }
 
   if (a.name !== b.name) {
-    console.log('Name mismatch')
     return false;
   }
 
   if (a.description !== b.description) {
-    console.log('Description mismatch')
     return false;
   }
 
