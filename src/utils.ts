@@ -101,3 +101,22 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
     );
   }
 }
+
+export function shuffle<T>(a: Array<T>): Array<T> {
+  const len = a?.length ?? 0;
+  if (!len) {
+    return [];
+  }
+
+  let i = -1;
+  const lastIndex = len - 1;
+  const result = [...a];
+  while (++i < len) {
+    const r = i + Math.floor(Math.random() * (lastIndex - i + 1));
+    const v = result[r];
+    result[r] = result[i];
+    result[i] = v;
+  }
+
+  return result;
+}

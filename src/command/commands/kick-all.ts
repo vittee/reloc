@@ -8,6 +8,7 @@ import {
 } from "discord.js";
 
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
+import { shuffle } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
@@ -61,7 +62,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
 
   const results: Array<GuildMember> = [];
 
-  for (const member of members.values()) {
+  for (const member of shuffle(Array.from(members.values()))) {
     const disconnected = await member.voice.disconnect(`Demanded by ${issuer.username}`).catch(() => false as const);
 
     if (disconnected !== false) {
