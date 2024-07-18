@@ -7,6 +7,7 @@ import { generateOAuth2Url, registerCommandsIfNeccessary } from './utils';
 
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
+const baseCommand = process.env.BASE_COMMAND || 'reloc';
 
 const commandHandlers = new Map<string, InteractionHandler>(Object.values(descriptors).map(desc => [
   desc.declaration.name, desc.commandHandler
@@ -26,7 +27,7 @@ console.log('OAuth URL:', generateOAuth2Url(clientId).toString());
 await registerCommandsIfNeccessary({
   token,
   clientId,
-  baseCommand: 'reloc'
+  baseCommand
 });
 
 client.on('interactionCreate', async (interaction) => {
