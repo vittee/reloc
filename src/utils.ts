@@ -17,9 +17,26 @@ export function generateOAuth2Url(clientId: string) {
 }
 
 function isSubCommandOptionIdentical(a: APIApplicationCommandSubcommandOption, b: APIApplicationCommandSubcommandOption) {
-  if (a.options?.length !== b.options?.length) {
-    console.log('Options mismatch')
+  if (!a.options || !b.options) {
     return false;
+  }
+
+  if (a.options.length !== b.options.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.options.length; i++) {
+    if (a.options[i].type !== b.options[i].type) {
+      return false;
+    }
+
+    if (a.options[i].name !== b.options[i].name) {
+      return false;
+    }
+
+    if (a.options[i].description !== b.options[i].description) {
+      return false;
+    }
   }
 
   return true;
