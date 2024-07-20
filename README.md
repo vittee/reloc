@@ -37,7 +37,16 @@ services:
 ```
 
 ### Run from source
-Simply clone or download this repository and then execute this command.
+Simply clone or download this repository. Put the `BOT_TOKEN` and `CLIENT_ID` into a new file named `.env`
+
+> .env
+```
+BOT_TOKEN=<your bot token>
+CLIENT_ID=<client id>
+```
+
+Then execute this command.
+
 ```sh
 bun start
 ```
