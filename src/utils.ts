@@ -118,7 +118,7 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
   const declaredCommand = createCommandDeclarations(baseCommand);
 
   if (!globalCommand || !isCmdIdentical(globalCommand, declaredCommand)) {
-    console.info(`Registering global command`);
+    console.info(`Register global command`);
 
     await rest.put(Routes.applicationCommands(clientId),
       {

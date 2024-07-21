@@ -20,15 +20,17 @@ const client = new Client({
   ]
 });
 
-await client.login(token);
-
-console.log('OAuth URL:', generateOAuth2Url(clientId).toString());
-
 await registerCommandsIfNeccessary({
   token,
   clientId,
   baseCommand
 });
+
+console.log('OAuth URL:', generateOAuth2Url(clientId).toString());
+
+client.once('ready', () => console.log('Ready'));
+
+await client.login(token);
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.user.bot) {
