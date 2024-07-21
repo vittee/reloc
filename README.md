@@ -45,7 +45,7 @@ BOT_TOKEN=<your bot token>
 CLIENT_ID=<client id>
 ```
 
-Then execute this command.
+Make sure you have [Bun](https://bun.sh/) installed and then execute this command.
 
 ```sh
 bun start
