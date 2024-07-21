@@ -63,8 +63,64 @@ Disconnect all users from a voice channel.
 /reloc kick-all
 ```
 
-### Arguments
+#### Arguments
 - `channel` **(required)** - A voice channel
+- `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `kick-role`
+Disconnect all users having the specified role from all voice channels.
+
+```
+/reloc kick-role
+```
+
+#### Arguments
+- `role` **(required)** - The role for users to be disconnected
+- `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `move-all`
+Move all users from a voice channel into a new channel.
+
+```
+/reloc move-all
+```
+
+#### Arguments
+- `from` **(required)** - A voice channel from which to move users
+- `to` **(required)** - A voice channel to which users will be moved into
+- `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `move-role`
+Move all users having the specified role into a new channel.
+
+```
+/reloc move-role
+```
+
+#### Arguments
+- `role` **(required)** - The role for users to be moved
+- `to` **(required)** - A voice channel to which users will be moved into
+- `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `annihilate` :warning:
+Disconnect **all users** from all voice channels.
+
+```
+/reloc annihilate
+```
+
+#### Arguments
+- `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `marshal` :warning:
+Move **all users** into a new voice channel.
+
+```
+/reloc marshal
+```
+
+#### Arguments
+- `to` **(required)** - A voice channel to which users will be moved into
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
 
 # Authors
