@@ -8,6 +8,7 @@ import kickRole from "./commands/kick-role";
 import moveAll from "./commands/move-all";
 import moveRole from "./commands/move-role";
 import annihilate from "./commands/annihilate";
+import marshal from "./commands/marshal";
 
 export const descriptors = {
   kickAll,
@@ -15,6 +16,7 @@ export const descriptors = {
   moveAll,
   moveRole,
   annihilate,
+  marshal
 }
 
 export const createCommandDeclarations = (baseCommand: string = 'reloc'): RESTPostAPIChatInputApplicationCommandsJSONBody => ({
