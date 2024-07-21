@@ -34,21 +34,20 @@ const declaration: APIApplicationCommandOption = {
 
 const commandHandler: InteractionHandler = async (interaction) => {
   const channelOpt = interaction.options.getChannel('channel');
-  const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
   if (!channelOpt) {
-    interaction.reply('Invalid channel')
+    interaction.reply('Invalid channel');
     return;
   }
 
   const channel = interaction.client.channels.cache.get(channelOpt.id);
 
   if (!channel?.isVoiceBased()) {
-    interaction.reply('Invalid channel')
+    interaction.reply('Invalid channel');
     return;
   }
 
-  const issuer = interaction.user;
+  const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
   const members = withBot
     ? channel.members
@@ -64,7 +63,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
   const results: Array<GuildMember> = [];
 
   for (const member of shuffle(Array.from(members.values()))) {
-    const disconnected = await member.voice.disconnect(`Demanded by ${issuer.username}`).catch(() => false as const);
+    const disconnected = await member.voice.disconnect(`Demanded by ${interaction.user.username}`).catch(() => false as const);
 
     if (disconnected !== false) {
       results.push(disconnected);
