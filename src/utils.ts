@@ -1,10 +1,12 @@
 import {
   ApplicationCommandOptionType,
+  GuildMember,
   OAuth2Scopes,
   PermissionFlagsBits,
   PermissionsBitField,
   REST,
   Routes,
+  userMention,
   type APIApplicationCommand,
   type APIApplicationCommandOption,
   type APIApplicationCommandSubcommandOption,
@@ -13,6 +15,7 @@ import {
 } from "discord.js";
 
 import { createCommandDeclarations } from "./command";
+import { chunk } from "lodash";
 
 export function generateOAuth2Url(clientId: string) {
   const scopes = [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands];
@@ -125,3 +128,6 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
   }
 }
 
+export function mentionUsers(users: GuildMember[], perLine: number = 4) {
+  return chunk(users.map(m => userMention(m.id)), perLine).map(c => c.join(' '))
+}

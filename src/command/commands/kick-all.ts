@@ -3,13 +3,13 @@ import {
   ApplicationCommandOptionType,
   ChannelType,
   GuildMember,
-  userMention,
   channelMention
 } from "discord.js";
 
-import { shuffle } from "lodash";
+import { chain } from "lodash";
 
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
+import { mentionUsers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
@@ -73,8 +73,8 @@ const commandHandler: InteractionHandler = async (interaction) => {
 
   interaction.editReply([
     'Disconnected',
-    ...results.map(m => userMention(m.id))
-  ].join('\n'))
+    ...mentionUsers(results)
+  ].join('\n'));
 }
 
 const descriptor: CommandDescriptor = {
