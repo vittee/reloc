@@ -1,5 +1,5 @@
-FROM oven/bun:1.1.16-alpine as base
 RUN apk add bash
+FROM oven/bun:1.1.20-alpine as base
 WORKDIR /app
 
 FROM base AS install
