@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 import { chain } from "lodash";
-import pluralize from 'pluralize';
+import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../types";
 import { mentionUsers, orderGuildMembers } from "../../utils";

@@ -1,9 +1,9 @@
 /// <reference path="./env.d.ts" />
 
-import { Client, GatewayIntentBits } from 'discord.js';
-import { descriptors } from './command';
-import type { InteractionHandler } from './command/types';
-import { generateOAuth2Url, registerCommandsIfNeccessary } from './utils';
+import { Client, GatewayIntentBits } from "discord.js";
+import { descriptors } from "./command";
+import type { InteractionHandler } from "./command/types";
+import { generateOAuth2Url, registerCommandsIfNeccessary } from "./utils";
 
 process.on('uncaughtException', console.error);
 process.on('unhandledRejection', console.error);
