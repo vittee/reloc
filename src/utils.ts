@@ -6,6 +6,7 @@ import {
   PermissionsBitField,
   REST,
   Routes,
+  User,
   userMention,
   type APIApplicationCommand,
   type APIApplicationCommandOption,
@@ -130,4 +131,27 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
 
 export function mentionUsers(users: GuildMember[], perLine: number = 4) {
   return chunk(users.map(m => userMention(m.id)), perLine).map(c => c.join(' '))
+}
+
+/**
+ * Sort guild members, the issuer comes first (if any)
+ * Followed by bot users, and normal users come last
+ *
+ */
+export function orderGuildMembers(options: { issuer?: User; reverse?: boolean; }) {
+  const dir = options.reverse
+    ? (v: number) => -v
+    : (v: number) => +v;
+
+  return (m: GuildMember) => {
+    if (options.issuer && options.issuer.id === m.user.id) {
+      return dir(1);
+    }
+
+    if (m.user.bot) {
+      return dir(2);
+    }
+
+    return dir(3);
+  }
 }

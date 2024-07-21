@@ -10,7 +10,7 @@ import { chain } from "lodash";
 import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
-import { mentionUsers } from "../../utils";
+import { mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
@@ -50,11 +50,16 @@ const commandHandler: InteractionHandler = async (interaction) => {
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = withBot
-    ? channel.members
-    : channel.members.filter(m => !m.user.bot);
+  const members = chain(Array.from(channel.members.values()))
+    .filter(m => withBot || !m.user.bot)
+    .shuffle()
+    .sortBy(orderGuildMembers({
+      issuer: interaction.user,
+      reverse: true
+    }))
+    .value();
 
-  if (members.size === 0) {
+  if (members.length === 0) {
     interaction.reply(`No users in ${channelMention(channel.id)}`);
     return;
   }
@@ -63,7 +68,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
 
   const results: Array<GuildMember> = [];
 
-  for (const member of shuffle(Array.from(members.values()))) {
+  for (const member of members) {
     const disconnected = await member.voice.disconnect(`Demanded by ${interaction.user.username}`).catch(() => false as const);
 
     if (disconnected !== false) {
