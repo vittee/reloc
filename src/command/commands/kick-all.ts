@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 
 import { chain } from "lodash";
+import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
 import { mentionUsers } from "../../utils";
@@ -71,7 +72,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
   }
 
   interaction.editReply([
-    'Disconnected',
+    `Disconnected ${pluralize('user', results.length, true)}`,
     ...mentionUsers(results)
   ].join('\n'));
 }
