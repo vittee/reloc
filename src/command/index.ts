@@ -4,9 +4,11 @@ import {
 } from "discord.js";
 
 import kickAll from "./commands/kick-all";
+import kickRole from "./commands/kick-role";
 
 export const descriptors = {
-  kickAll
+  kickAll,
+  kickRole,
 }
 
 export const createCommandDeclarations = (baseCommand: string = 'reloc'): RESTPostAPIChatInputApplicationCommandsJSONBody => ({
