@@ -5,6 +5,9 @@ import { descriptors } from './command';
 import type { InteractionHandler } from './command/types';
 import { generateOAuth2Url, registerCommandsIfNeccessary } from './utils';
 
+process.on('uncaughtException', console.error);
+process.on('unhandledRejection', console.error);
+
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
 const baseCommand = process.env.BASE_COMMAND || 'reloc';
