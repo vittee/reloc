@@ -8,12 +8,14 @@
     "start": "bun run src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "1.1.6"
+    "@types/bun": "1.1.6",
+    "@types/lodash": "^4.17.7"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "discord.js": "^14.15.3"
+    "discord.js": "^14.15.3",
+    "lodash": "^4.17.21"
   }
 }

@@ -7,8 +7,9 @@ import {
   channelMention
 } from "discord.js";
 
+import { shuffle } from "lodash";
+
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
-import { shuffle } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
