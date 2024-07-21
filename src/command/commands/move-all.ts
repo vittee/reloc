@@ -85,7 +85,10 @@ const commandHandler: InteractionHandler = async (interaction) => {
     const moved = await member.voice.setChannel(
       toChannel,
       `Demanded by ${interaction.user.username}`
-    ).catch(() => false as const);
+    ).catch((e) => {
+      console.error(`Error moving ${member.displayName} into ${toChannel.name}: ${e.message}`);
+      return false as const;
+    });
 
     if (moved !== false) {
       results.push(moved);
