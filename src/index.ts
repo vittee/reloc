@@ -1,6 +1,6 @@
 /// <reference path="./env.d.ts" />
 
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, PermissionFlagsBits } from "discord.js";
 import { descriptors } from "./command";
 import type { InteractionHandler } from "./command/types";
 import { generateOAuth2Url, registerCommandsIfNeccessary } from "./utils";
@@ -52,6 +52,18 @@ client.on('interactionCreate', async (interaction) => {
   const handler = commandHandlers.get(groupOrCommand);
 
   if (!handler) {
+    return;
+  }
+
+  const permitted = interaction.memberPermissions?.any([
+    PermissionFlagsBits.Administrator,
+    PermissionFlagsBits.ManageChannels,
+    PermissionFlagsBits.ManageGuild,
+    PermissionFlagsBits.MoveMembers
+  ]) === true;
+
+  if (!permitted) {
+    interaction.reply('Insufficient permissions');
     return;
   }
 
