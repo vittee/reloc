@@ -1,25 +1,25 @@
 {
-	"name": "Re-loc bot",
-	"image": "oven/bun:1.1.20-slim",
-	"remoteUser": "bun",
-	"features": {
+  "name": "Reloc bot",
+  "image": "oven/bun:1.1.20-slim",
+  "remoteUser": "bun",
+  "features": {
     "ghcr.io/devcontainers/features/rust:1": {},
-		"ghcr.io/devcontainers/features/common-utils:2": {
-			"installZsh": true,
-			"installOhMyZsh": true,
-			"installOhMyZshConfig": true,
-			"configureZshAsDefaultShell": true,
-			"username": "bun"
-		}
-	},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "configureZshAsDefaultShell": true,
+      "username": "bun"
+    }
+  },
   "postCreateCommand": "git config --global devcontainers-theme.hide-status 1 && cargo install git-cliff",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"EditorConfig.EditorConfig",
-				"tamasfe.even-better-toml",
-				"github.vscode-github-actions"
-			]
-		}
-	}
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "EditorConfig.EditorConfig",
+        "tamasfe.even-better-toml",
+        "github.vscode-github-actions"
+      ]
+    }
+  }
 }
