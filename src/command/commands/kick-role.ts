@@ -2,7 +2,8 @@ import {
   type APIApplicationCommandOption,
   ApplicationCommandOptionType,
   GuildMember,
-  roleMention
+  roleMention,
+  PermissionFlagsBits
 } from "discord.js";
 
 import { chain } from "lodash";
@@ -43,6 +44,13 @@ const commandHandler: InteractionHandler = async (interaction) => {
   if (!role) {
     interaction.reply('Invalid role');
     return;
+  }
+
+  if (role.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+      interaction.reply('Insufficient permissions');
+      return;
+    }
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
