@@ -38,15 +38,16 @@ const commandHandler: InteractionHandler = async (interaction) => {
   }
 
   const roleOpt = interaction.options.getRole('role');
+  const role = roleOpt ? await interaction.guild.roles.fetch(roleOpt.id) : undefined;
 
-  if (!roleOpt) {
+  if (!role) {
     interaction.reply('Invalid role');
     return;
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = chain(await interaction.guild.roles.fetch(roleOpt.id).then(r => Array.from(r?.members?.values() ?? [])))
+  const members = chain(Array.from(role.members.values()))
     .filter(m => withBot || !m.user.bot)
     .shuffle()
     .sortBy(orderGuildMembers({
@@ -56,7 +57,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .value();
 
   if (members.length === 0) {
-    interaction.reply(`No users of role ${roleMention(roleOpt.id)} in any voice channels`);
+    interaction.reply(`No users of role ${roleMention(role.id)} in any voice channels`);
     return;
   }
 
