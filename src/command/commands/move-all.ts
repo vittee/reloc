@@ -44,19 +44,14 @@ const commandHandler: InteractionHandler = async (interaction) => {
   const from = interaction.options.getChannel('from');
   const to = interaction.options.getChannel('to');
 
-  if (!from || !to) {
-    interaction.reply('Invalid channel');
-    return;
-  }
-
-  const [fromChannel, toChannel] = [from, to].map(({ id }) => interaction.client.channels.cache.get(id));
+  const [fromChannel, toChannel] = [from, to].map(c => c ? interaction.client.channels.cache.get(c.id) : undefined);
 
   if (!fromChannel?.isVoiceBased() || !toChannel?.isVoiceBased()) {
     interaction.reply('Invalid channel');
     return;
   }
 
-  if (from.id === to.id) {
+  if (fromChannel.id === toChannel.id) {
     interaction.reply('Channels are identical');
     return;
   }
