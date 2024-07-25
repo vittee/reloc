@@ -41,10 +41,10 @@ const declaration: APIApplicationCommandOption = {
 }
 
 const commandHandler: InteractionHandler = async (interaction) => {
-  const from = interaction.options.getChannel('from');
-  const to = interaction.options.getChannel('to');
-
-  const [fromChannel, toChannel] = [from, to].map(c => c ? interaction.client.channels.cache.get(c.id) : undefined);
+  const [fromChannel, toChannel] = await Promise.all(['from', 'to']
+    .map(n => interaction.options.getChannel(n))
+    .map(c => c ? interaction.client.channels.fetch(c.id) : undefined)
+  );
 
   if (!fromChannel?.isVoiceBased() || !toChannel?.isVoiceBased()) {
     interaction.reply('Invalid channel');

@@ -54,7 +54,9 @@ const commandHandler: InteractionHandler = async (interaction) => {
   }
 
   const to = interaction.options.getChannel('to');
-  const toChannel = to ? interaction.client.channels.cache.get(to.id) : undefined;
+  const toChannel = to
+    ? await interaction.client.channels.fetch(to.id)
+    : undefined;
 
   if (!toChannel?.isVoiceBased()) {
     interaction.reply('Invalid channel');
