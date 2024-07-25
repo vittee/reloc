@@ -66,6 +66,7 @@ Disconnect all users from a voice channel.
 #### Arguments
 - `channel` **(required)** - A voice channel
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+- `reason` **(optional)** - The reason for the disconnection
 
 ### `kick-role`
 Disconnect all users having the specified role from all voice channels.
@@ -77,6 +78,7 @@ Disconnect all users having the specified role from all voice channels.
 #### Arguments
 - `role` **(required)** - The role for users to be disconnected
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+- `reason` **(optional)** - The reason for the disconnection
 
 ### `move-all`
 Move all users from a voice channel into a new channel.
@@ -105,15 +107,22 @@ Move all users having the specified role into a new channel.
 ### `annihilate` :warning:
 Disconnect **all users** from all voice channels.
 
+> [!WARNING]
+> This command is server-wide, it disconnects **all users** from **all voice channels**.
+
 ```
 /reloc annihilate
 ```
 
 #### Arguments
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+- `reason` **(optional)** - The reason for the disconnection
 
 ### `marshal` :warning:
 Move **all users** into a new voice channel.
+
+> [!WARNING]
+> This command is server-wide, it moves **all users** from **all voice channels**.
 
 ```
 /reloc marshal
@@ -122,6 +131,28 @@ Move **all users** into a new voice channel.
 #### Arguments
 - `to` **(required)** - A voice channel to which users will be moved into
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
+
+### `kick`
+Disconnect up to 10 users from all voice channels.
+
+```
+/reloc kick
+```
+
+#### Arguments
+- `user1`...`user10`  - List of users to be disconnected, at least `user1` must be specified
+- `reason` **(optional)** - The reason for the disconnection
+
+### `move`
+Disconnect up to 10 users from all voice channels.
+
+```
+/reloc move
+```
+
+#### Arguments
+- `to` **(required)** - A voice channel to which users will be moved into
+- `user1`...`user10`  - List of users to be disconnected, at least `user1` must be specified
 
 # Authors
 - [Wittawas Nakkasem (vittee)](https://github.com/vittee)
