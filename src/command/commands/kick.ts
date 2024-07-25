@@ -16,13 +16,21 @@ const declaration: APIApplicationCommandOption = {
   name: 'kick',
   description: 'Disconnect up to 10 users',
   type: ApplicationCommandOptionType.Subcommand,
-  options: range(0, 10)
-    .map<APIApplicationCommandUserOption>(i => ({
-      name: `user${i + 1}`,
-      description: `User ${i + 1}`,
-      type: ApplicationCommandOptionType.User,
-      require: i === 0
-    }))
+  options: [
+    ...range(0, 10)
+      .map<APIApplicationCommandUserOption>(i => ({
+        name: `user${i + 1}`,
+        description: `User ${i + 1}`,
+        type: ApplicationCommandOptionType.User,
+        require: i === 0
+      })),
+    {
+      name: 'reason',
+      description: 'Reason',
+      type: ApplicationCommandOptionType.String,
+      required: false
+    }
+  ]
 }
 
 const commandHandler: InteractionHandler = async (interaction) => {
@@ -57,8 +65,10 @@ const commandHandler: InteractionHandler = async (interaction) => {
     }
   }
 
+  const reason = interaction.options.getString('reason');
+
   interaction.editReply([
-    `Disconnected ${pluralize('user', results.length, true)}`,
+    `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
     ...mentionUsers(results)
   ].join('\n'));
 }

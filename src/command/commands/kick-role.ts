@@ -28,6 +28,12 @@ const declaration: APIApplicationCommandOption = {
       description: 'Include bot users',
       type: ApplicationCommandOptionType.Boolean,
       required: false
+    },
+    {
+      name: 'reason',
+      description: 'Reason',
+      type: ApplicationCommandOptionType.String,
+      required: false
     }
   ]
 }
@@ -81,8 +87,10 @@ const commandHandler: InteractionHandler = async (interaction) => {
     }
   }
 
+  const reason = interaction.options.getString('reason');
+
   interaction.editReply([
-    `Disconnected ${pluralize('user', results.length, true)}`,
+    `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
     ...mentionUsers(results)
   ].join('\n'));
 }
