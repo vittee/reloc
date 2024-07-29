@@ -1,29 +1,31 @@
 import {
+  type APIApplicationCommandChannelOption,
   type APIApplicationCommandOption,
   ApplicationCommandOptionType,
   ChannelType,
-  GuildMember,
-  channelMention
+  GuildMember
 } from "discord.js";
 
-import { chain } from "lodash";
+import { chain, range } from "lodash";
+import { uniqBy } from "lodash/fp";
 import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../../command/types";
-import { mentionUsers, orderGuildMembers } from "../../utils";
+import { fetchCommandVoiceChannels, mentionChannels, mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
   description: 'Disconnect all users from a voice channel',
   type: ApplicationCommandOptionType.Subcommand,
   options: [
-    {
-      name: 'channel',
-      description: 'A voice channel',
-      type: ApplicationCommandOptionType.Channel,
-      channel_types: [ChannelType.GuildVoice],
-      required: true
-    },
+    ...range(0, 5)
+      .map<APIApplicationCommandChannelOption>(i => ({
+        name: `channel${i + 1}`,
+        description: `Voice channel ${i + 1}`,
+        type: ApplicationCommandOptionType.Channel,
+        channel_types: [ChannelType.GuildVoice],
+        required: i === 0
+      })),
     {
       name: 'with-bot',
       description: 'Include bot users',
@@ -40,19 +42,19 @@ const declaration: APIApplicationCommandOption = {
 }
 
 const commandHandler: InteractionHandler = async (interaction) => {
-  const channelOpt = interaction.options.getChannel('channel');
-  const channel = channelOpt
-    ? await interaction.client.channels.fetch(channelOpt.id)
-    : undefined;
+  const channels = await fetchCommandVoiceChannels(interaction,range(0, 5).map(i => `channel${i + 1}`))
+    .then(all => all.filter(c => !!c))
+    .then(uniqBy(c => c.id))
 
-  if (!channel?.isVoiceBased()) {
+  if (channels.length <= 0) {
     interaction.reply('Invalid channel');
     return;
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = chain(Array.from(channel.members.values()))
+  const members = chain(channels)
+    .flatMap(c => Array.from(c.members.values()))
     .filter(m => withBot || !m.user.bot)
     .shuffle()
     .sortBy(orderGuildMembers({
@@ -62,7 +64,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .value();
 
   if (members.length === 0) {
-    interaction.reply(`No users in ${channelMention(channel.id)}`);
+    interaction.reply(`No users in ${mentionChannels(channels).join(' ')}`);
     return;
   }
 
