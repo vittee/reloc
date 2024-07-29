@@ -1,28 +1,30 @@
 import {
   type APIApplicationCommandOption,
+  type APIApplicationCommandRoleOption,
   ApplicationCommandOptionType,
   GuildMember,
-  roleMention,
   PermissionFlagsBits
 } from "discord.js";
 
-import { chain } from "lodash";
+import { chain, range } from "lodash";
+import { uniqBy } from "lodash/fp";
 import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../types";
-import { mentionUsers, orderGuildMembers } from "../../utils";
+import { fetchCommandRoles, mentionRoles, mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-role',
   description: 'Disconnect all users of the specified role from all voice channels',
   type: ApplicationCommandOptionType.Subcommand,
   options: [
-    {
-      name: 'role',
-      description: 'User role',
-      type: ApplicationCommandOptionType.Role,
-      required: true
-    },
+    ...range(0, 5)
+      .map<APIApplicationCommandRoleOption>(i => ({
+          name: `role${i + 1}`,
+          description: `User role ${i + 1}`,
+          type: ApplicationCommandOptionType.Role,
+          required: i === 0
+      })),
     {
       name: 'with-bot',
       description: 'Include bot users',
@@ -44,24 +46,28 @@ const commandHandler: InteractionHandler = async (interaction) => {
     return;
   }
 
-  const roleOpt = interaction.options.getRole('role');
-  const role = roleOpt ? await interaction.guild.roles.fetch(roleOpt.id) : undefined;
+  const roles = await fetchCommandRoles(interaction, range(0, 5).map(i => `role${i + 1}`))
+    .then(all => all.filter(r => !!r))
+    .then(uniqBy(r => r.id));
 
-  if (!role) {
+  if (roles.length <= 0) {
     interaction.reply('Invalid role');
     return;
   }
 
-  if (role.permissions.has(PermissionFlagsBits.Administrator)) {
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-      interaction.reply('Insufficient permissions');
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    const adminRoles = roles.filter(role => role.permissions.has(PermissionFlagsBits.Administrator));
+
+    if (adminRoles) {
+      interaction.reply(`You do not have permissions for ${mentionRoles(adminRoles)}`);
       return;
     }
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = chain(Array.from(role.members.values()))
+  const members = chain(roles)
+    .flatMap(role => Array.from(role.members.values()))
     .filter(m => withBot || !m.user.bot)
     .shuffle()
     .sortBy(orderGuildMembers({
@@ -71,7 +77,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .value();
 
   if (members.length === 0) {
-    interaction.reply(`No users of role ${roleMention(role.id)} in any voice channels`);
+    interaction.reply(`No users of role ${mentionRoles(roles)} in any voice channels`);
     return;
   }
 
