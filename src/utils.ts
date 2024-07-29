@@ -33,40 +33,48 @@ export function generateOAuth2Url(clientId: string) {
   return url;
 }
 
-function isSubCommandOptionIdentical(a: APIApplicationCommandSubcommandOption, b: APIApplicationCommandSubcommandOption) {
+function isSubCommandOptionIdentical(a: APIApplicationCommandSubcommandOption, b: APIApplicationCommandSubcommandOption): string | true {
+  if (!a.options && !b.options) {
+    return true;
+  }
+
   if (!a.options || !b.options) {
-    return false;
+    return 'Options mismatch';
   }
 
   if (a.options.length !== b.options.length) {
-    return false;
+    return 'Options size mismatch';
   }
 
   for (let i = 0; i < a.options.length; i++) {
     if (a.options[i].type !== b.options[i].type) {
-      return false;
+      return 'Option type mismatch';
     }
 
     if (a.options[i].name !== b.options[i].name) {
-      return false;
+      return 'Option name mismatch';
     }
 
     if (a.options[i].description !== b.options[i].description) {
-      return false;
+      return 'Option description mismatch';
+    }
+
+    if ((a.options[i].required ?? false) !== (b.options[i].required ?? false)) {
+      return 'Option required flag mismatch';
     }
   }
 
   return true;
 }
 
-function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicationCommandOption[]): boolean {
+function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicationCommandOption[]): string | true {
   if (a.length !== b.length) {
-    return false;
+    return 'Subcommand mismatch';
   }
 
   for (let i = 0; i < a.length; i++) {
     if (a[i].type as any !== b[i].type as any) {
-      return false;
+      return 'Subcommand type mismatch';
     }
 
     if (a[i].type === ApplicationCommandOptionType.Subcommand) {
@@ -75,34 +83,34 @@ function isSubCommandIdentical(a: APIApplicationCommandOption[], b: APIApplicati
         b[i] as APIApplicationCommandSubcommandOption
       );
 
-      if (!optionIdentical) {
-        return false;
+      if (optionIdentical !== true) {
+        return optionIdentical;
       }
     }
 
     if (a[i].name !== b[i].name) {
-      return false;
+      return 'Subcommand name mismatch';
     }
 
     if (a[i].description !== b[i].description) {
-      return false;
+      return 'Subcommand description mismatch';
     }
   }
 
   return true;
 }
 
-function isCmdIdentical(a: APIApplicationCommand, b: RESTPostAPIChatInputApplicationCommandsJSONBody): boolean {
+function isCmdIdentical(a: APIApplicationCommand, b: RESTPostAPIChatInputApplicationCommandsJSONBody): string | true {
   if (a.type as any !== b.type as any) {
-    return false;
+    return 'Type mismatch';
   }
 
   if (a.name !== b.name) {
-    return false;
+    return 'Name mismatch';
   }
 
   if (a.description !== b.description) {
-    return false;
+    return 'Description mismatch';
   }
 
   return isSubCommandIdentical(a.options ?? [], b.options ?? []);
@@ -113,13 +121,14 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
   const rest = new REST().setToken(token);
 
   const globalCommand = await rest.get(Routes.applicationCommands(clientId))
-    .then(list => (list as RESTGetAPIApplicationCommandsResult).find(cmd => cmd.name === baseCommand))
-    .then(command => command as APIApplicationCommand | undefined);
+    .then(list => (list as RESTGetAPIApplicationCommandsResult).find(cmd => cmd.name === baseCommand));
 
   const declaredCommand = createCommandDeclarations(baseCommand);
 
-  if (!globalCommand || !isCmdIdentical(globalCommand, declaredCommand)) {
-    console.info(`Register global command`);
+  const registrationCheck = !!globalCommand && isCmdIdentical(globalCommand, declaredCommand);
+
+  if (registrationCheck !== true) {
+    console.info(`Register global command, ${registrationCheck || 'not yet registered'}`);
 
     await rest.put(Routes.applicationCommands(clientId),
       {
