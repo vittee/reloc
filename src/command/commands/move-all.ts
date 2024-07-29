@@ -1,64 +1,83 @@
 import {
   type APIApplicationCommandOption,
+  type APIApplicationCommandChannelOption,
   ApplicationCommandOptionType,
   ChannelType,
-  channelMention,
   GuildMember
 } from "discord.js";
 
-import { chain } from "lodash";
+import { chain, range } from "lodash";
 import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../types";
-import { mentionUsers, orderGuildMembers } from "../../utils";
+import { fetchCommandVoiceChannels, mentionChannels, mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
   name: 'move-all',
   description: 'Move all users from a voice channel into a new voice channel',
   type: ApplicationCommandOptionType.Subcommand,
-  options: [
-    {
-      name: 'from',
-      description: 'The voice channel to move users from',
-      type: ApplicationCommandOptionType.Channel,
-      channel_types: [ChannelType.GuildVoice],
-      required: true
-    },
-    {
-      name: 'to',
-      description: 'The designated voice channel',
-      type: ApplicationCommandOptionType.Channel,
-      channel_types: [ChannelType.GuildVoice],
-      required: true
-    },
-    {
-      name: 'with-bot',
-      description: 'Include bot users',
-      type: ApplicationCommandOptionType.Boolean,
-      required: false
-    }
-  ]
+  options: (() => {
+    const froms = range(0, 5)
+      .map<APIApplicationCommandChannelOption>(i => ({
+        name: `from${i + 1}`,
+        description: `Voice channel ${i + 1}`,
+        type: ApplicationCommandOptionType.Channel,
+        channel_types: [ChannelType.GuildVoice],
+        required: i === 0
+      }));
+
+    return [
+      froms[0],
+      {
+        name: 'to',
+        description: 'The designated voice channel',
+        type: ApplicationCommandOptionType.Channel,
+        channel_types: [ChannelType.GuildVoice],
+        required: true
+      },
+      ...froms.slice(1),
+      {
+        name: 'with-bot',
+        description: 'Include bot users',
+        type: ApplicationCommandOptionType.Boolean,
+        required: false
+      }
+    ];
+  })()
 }
 
 const commandHandler: InteractionHandler = async (interaction) => {
-  const [fromChannel, toChannel] = await Promise.all(['from', 'to']
-    .map(n => interaction.options.getChannel(n))
-    .map(c => c ? interaction.client.channels.fetch(c.id) : undefined)
+  const channels = await fetchCommandVoiceChannels(
+    interaction,
+    [
+      ...range(0, 5).map(i => `from${i + 1}`),
+      'to'
+    ]
   );
 
-  if (!fromChannel?.isVoiceBased() || !toChannel?.isVoiceBased()) {
+  const fromChannels = chain(channels)
+    .slice(0, -1)
+    .filter(c => !!c)
+    .uniqBy(c => c.id)
+    .value();
+
+  const toChannel = channels.at(-1);
+
+  if (fromChannels.length <= 0 || !toChannel) {
     interaction.reply('Invalid channel');
     return;
   }
 
-  if (fromChannel.id === toChannel.id) {
+  if (fromChannels.length === 1 && fromChannels[0].id === toChannel.id) {
     interaction.reply('Channels are identical');
     return;
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = chain(Array.from(fromChannel.members.values()))
+  const members = chain(fromChannels)
+    .reject(c => c.id === toChannel.id)
+    .flatMap(c => Array.from(c.members.values()))
     .filter(m => withBot || !m.user.bot)
     .shuffle()
     .sortBy(orderGuildMembers({
@@ -68,7 +87,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .value();
 
   if (members.length === 0) {
-    interaction.reply(`No users in ${channelMention(fromChannel.id)}`);
+    interaction.reply(`No users in ${mentionChannels(fromChannels).join('\n')}`);
     return;
   }
 
@@ -77,6 +96,10 @@ const commandHandler: InteractionHandler = async (interaction) => {
   const results: Array<GuildMember> = [];
 
   for (const member of members) {
+    if (!member.voice.channelId || member.voice.channelId === toChannel.id) {
+      continue;
+    }
+
     const moved = await member.voice.setChannel(
       toChannel,
       `Demanded by ${interaction.user.username}`
