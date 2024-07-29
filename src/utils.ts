@@ -1,22 +1,28 @@
 import {
   ApplicationCommandOptionType,
+  ChatInputCommandInteraction,
   GuildMember,
   OAuth2Scopes,
   PermissionFlagsBits,
   PermissionsBitField,
-  REST,
-  Routes,
-  User,
-  userMention,
   type APIApplicationCommand,
   type APIApplicationCommandOption,
   type APIApplicationCommandSubcommandOption,
   type RESTGetAPIApplicationCommandsResult,
-  type RESTPostAPIChatInputApplicationCommandsJSONBody
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type Snowflake,
+  REST,
+  type Channel,
+  channelMention,
+  type Role,
+  roleMention,
+  Routes,
+  type User,
+  userMention
 } from "discord.js";
 
 import { createCommandDeclarations } from "./command";
-import { chunk } from "lodash";
+import { chain, chunk } from "lodash";
 
 export function generateOAuth2Url(clientId: string) {
   const scopes = [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands];
@@ -137,10 +143,18 @@ export async function registerCommandsIfNeccessary(options: Record<'token' | 'cl
     );
   }
 }
-
-export function mentionUsers(users: GuildMember[], perLine: number = 4) {
-  return chunk(users.map(m => userMention(m.id)), perLine).map(c => c.join(' '))
+function mentionMultiple(users: GuildMember[], perLine: number, mentioner: typeof userMention): string[];
+function mentionMultiple(users: Channel[], perLine: number, mentioner: typeof channelMention): string[];
+function mentionMultiple(roles: Role[], perLine: number, mentioner: typeof roleMention): string[];
+function mentionMultiple<I extends { id: Snowflake }>(items: Array<I>, perLine: number, mentioner: (id: I['id']) => string): string[] {
+  return chunk(items.map(m => mentioner(m.id)), perLine).map(c => c.join(' '));
 }
+
+export const mentionUsers = (users: GuildMember[], perLine: number = 4) => mentionMultiple(users, perLine, userMention);
+
+export const mentionChannels = (channels: Channel[], perLine: number = 4) => mentionMultiple(channels, perLine, channelMention);
+
+export const mentionRoles = (roles: Role[], perLine: number = 4) => mentionMultiple(roles, perLine, roleMention);
 
 /**
  * Sort guild members, the issuer comes first (if any)
@@ -163,4 +177,31 @@ export function orderGuildMembers(options: { issuer?: User; reverse?: boolean; }
 
     return dir(3);
   }
+}
+
+export async function fetchCommandVoiceChannels(interaction: ChatInputCommandInteraction, names: string[]) {
+  return chain(names)
+    .map(name => interaction.options.getChannel(name))
+    .map(c => c ? interaction.client.channels.fetch(c.id) : undefined)
+    .thru(promises => (
+      Promise.all(promises)
+        .then(channels => channels
+          .map(c => c?.isVoiceBased() ? c : undefined)
+        )
+    ))
+    .value();
+}
+
+export async function fetchCommandRoles(interaction: ChatInputCommandInteraction, names: string[]) {
+  const { guild, options } = interaction;
+
+  if (!guild) {
+    return [];
+  }
+
+  return chain(names)
+    .map(name => options.getRole(name))
+    .map(c => c ? guild.roles.fetch(c.id) : undefined)
+    .thru(promises => Promise.all(promises).then(roles => roles.map(c => c ?? undefined)))
+    .value();
 }
