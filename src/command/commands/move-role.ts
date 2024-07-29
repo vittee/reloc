@@ -1,42 +1,50 @@
 import {
   type APIApplicationCommandOption,
+  type APIApplicationCommandRoleOption,
   ApplicationCommandOptionType,
   GuildMember,
-  roleMention,
-  ChannelType
+  ChannelType,
+  PermissionFlagsBits
 } from "discord.js";
 
-import { chain } from "lodash";
+import { chain, range } from "lodash";
 import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandler } from "../types";
-import { mentionUsers, orderGuildMembers } from "../../utils";
+import { fetchCommandRoles, fetchCommandVoiceChannels, mentionRoles, mentionUsers, orderGuildMembers } from "../../utils";
+import { uniqBy } from "lodash/fp";
 
 const declaration: APIApplicationCommandOption = {
   name: 'move-role',
   description: 'Move all users of the specified role into a new voice channel',
   type: ApplicationCommandOptionType.Subcommand,
-  options: [
-    {
-      name: 'role',
-      description: 'User role',
-      type: ApplicationCommandOptionType.Role,
-      required: true
-    },
-    {
-      name: 'to',
-      description: 'The designated voice channel',
-      type: ApplicationCommandOptionType.Channel,
-      channel_types: [ChannelType.GuildVoice],
-      required: true
-    },
-    {
-      name: 'with-bot',
-      description: 'Include bot users',
-      type: ApplicationCommandOptionType.Boolean,
-      required: false
-    }
-  ]
+  options: (() => {
+    const roles = range(0, 5)
+      .map<APIApplicationCommandRoleOption>(i => ({
+          name: `role${i + 1}`,
+          description: `User role ${i + 1}`,
+          type: ApplicationCommandOptionType.Role,
+          required: i === 0
+      }));
+
+    return [
+      roles[0],
+      {
+        name: 'to',
+        description: 'The designated voice channel',
+        type: ApplicationCommandOptionType.Channel,
+        channel_types: [ChannelType.GuildVoice],
+        required: true
+      },
+      ...roles.slice(1),
+      {
+        name: 'with-bot',
+        description: 'Include bot users',
+        type: ApplicationCommandOptionType.Boolean,
+        required: false
+      }
+    ]
+  })()
 }
 
 const commandHandler: InteractionHandler = async (interaction) => {
@@ -45,27 +53,35 @@ const commandHandler: InteractionHandler = async (interaction) => {
     return;
   }
 
-  const roleOpt = interaction.options.getRole('role');
-  const role = roleOpt ? await interaction.guild.roles.fetch(roleOpt.id) : undefined;
+  const roles = await fetchCommandRoles(interaction, range(0, 5).map(i => `role${i + 1}`))
+    .then(all => all.filter(r => !!r))
+    .then(uniqBy(r => r.id));
 
-  if (!role) {
+  if (roles.length <= 0) {
     interaction.reply('Invalid role');
     return;
   }
 
-  const to = interaction.options.getChannel('to');
-  const toChannel = to
-    ? await interaction.client.channels.fetch(to.id)
-    : undefined;
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    const adminRoles = roles.filter(role => role.permissions.has(PermissionFlagsBits.Administrator));
 
-  if (!toChannel?.isVoiceBased()) {
+    if (adminRoles) {
+      interaction.reply(`You do not have permissions for ${mentionRoles(adminRoles)}`);
+      return;
+    }
+  }
+
+  const [toChannel] = await fetchCommandVoiceChannels(interaction, ['to']);
+
+  if (!toChannel) {
     interaction.reply('Invalid channel');
     return;
   }
 
   const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-  const members = chain(Array.from(role.members.values()))
+  const members = chain(roles)
+    .flatMap(role => Array.from(role.members.values()))
     .filter(m => withBot || !m.user.bot)
     .shuffle()
     .sortBy(orderGuildMembers({
@@ -75,7 +91,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .value();
 
   if (members.length === 0) {
-    interaction.reply(`No users of role ${roleMention(role.id)} in any voice channels`);
+    interaction.reply(`No users of role ${mentionRoles(roles)} in any voice channels`);
     return;
   }
 
@@ -84,7 +100,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
   const results: Array<GuildMember> = [];
 
   for (const member of members) {
-    if (member.voice.channelId === toChannel.id) {
+    if (!member.voice.channelId || member.voice.channelId === toChannel.id) {
       continue;
     }
 
