@@ -64,7 +64,8 @@ Disconnect all users from a voice channel.
 ```
 
 #### Arguments
-- `channel` **(required)** - A voice channel
+- `channel1` **(required)** - A voice channel
+- `channel2`...`channel5` **(optional)** - Voice channels
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
 - `reason` **(optional)** - The reason for the disconnection
 
@@ -76,7 +77,8 @@ Disconnect all users having the specified role from all voice channels.
 ```
 
 #### Arguments
-- `role` **(required)** - The role for users to be disconnected
+- `role1` **(required)** - The role for users to be disconnected
+- `role2`..`role5` **(optional)** - The roles for users to be disconnected
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
 - `reason` **(optional)** - The reason for the disconnection
 
@@ -88,8 +90,9 @@ Move all users from a voice channel into a new channel.
 ```
 
 #### Arguments
-- `from` **(required)** - A voice channel from which to move users
+- `from1` **(required)** - A voice channel from which to move users
 - `to` **(required)** - A voice channel to which users will be moved into
+- `from2`...`from5` **(optional)** - Voice channels from which to move users
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
 
 ### `move-role`
@@ -100,8 +103,9 @@ Move all users having the specified role into a new channel.
 ```
 
 #### Arguments
-- `role` **(required)** - The role for users to be moved
+- `role1` **(required)** - The role for users to be moved
 - `to` **(required)** - A voice channel to which users will be moved into
+- `role2`..`role5` **(optional)** - The roles for users to be moved
 - `with-bot` **(optional)** - Normally, Reloc will not disconnect bot users unless this value is set to `True`
 
 ### `annihilate` :warning:
