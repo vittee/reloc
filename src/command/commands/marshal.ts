@@ -1,8 +1,8 @@
 import {
   type APIApplicationCommandOption,
+  type VoiceBasedChannel,
   ApplicationCommandOptionType,
   GuildMember,
-  type VoiceBasedChannel,
   ChannelType
 } from "discord.js";
 
