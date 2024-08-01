@@ -68,19 +68,20 @@ const commandHandler: InteractionHandler = async (interaction) => {
     return;
   }
 
+  const reason = interaction.options.getString('reason');
+  const logMessage = reason || `Demanded by ${interaction.user.username}`;
+
   await interaction.deferReply();
 
   const results: Array<GuildMember> = [];
 
   for (const member of members) {
-    const disconnected = await member.voice.disconnect(`Demanded by ${interaction.user.username}`).catch(() => false as const);
+    const disconnected = await member.voice.disconnect(logMessage).catch(() => false as const);
 
     if (disconnected !== false) {
       results.push(disconnected);
     }
   }
-
-  const reason = interaction.options.getString('reason');
 
   interaction.editReply([
     `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
