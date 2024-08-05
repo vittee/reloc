@@ -17,15 +17,15 @@ const declaration: APIApplicationCommandOption = {
   type: ApplicationCommandOptionType.Subcommand,
   options: [
     {
-      name: 'with-bot',
-      description: 'Include bot users',
-      type: ApplicationCommandOptionType.Boolean,
-      required: false
-    },
-    {
       name: 'reason',
       description: 'Reason',
       type: ApplicationCommandOptionType.String,
+      required: true
+    },
+    {
+      name: 'with-bot',
+      description: 'Include bot users',
+      type: ApplicationCommandOptionType.Boolean,
       required: false
     }
   ]

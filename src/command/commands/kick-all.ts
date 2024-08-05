@@ -27,15 +27,15 @@ const declaration: APIApplicationCommandOption = {
         required: i === 0
       })),
     {
-      name: 'with-bot',
-      description: 'Include bot users',
-      type: ApplicationCommandOptionType.Boolean,
-      required: false
-    },
-    {
       name: 'reason',
       description: 'Reason',
       type: ApplicationCommandOptionType.String,
+      required: true
+    },
+    {
+      name: 'with-bot',
+      description: 'Include bot users',
+      type: ApplicationCommandOptionType.Boolean,
       required: false
     }
   ]
