@@ -1,4 +1,5 @@
 import {
+  ApplicationCommandOptionType,
   ApplicationCommandType,
   type RESTPostAPIChatInputApplicationCommandsJSONBody
 } from "discord.js";
@@ -11,6 +12,7 @@ import annihilate from "./commands/annihilate";
 import marshal from "./commands/marshal";
 import kick from "./commands/kick";
 import move from "./commands/move";
+import { sortBy } from "lodash";
 
 export const descriptors = {
   kickAll,
@@ -27,5 +29,18 @@ export const createCommandDeclarations = (baseCommand: string = 'reloc'): RESTPo
   name: baseCommand,
   description: 'Reloc',
   type: ApplicationCommandType.ChatInput,
-  options: Object.values(descriptors).map(desc => desc.declaration)
+  options: Object.values(descriptors)
+    .map(desc => {
+      const { declaration } = desc;
+      if (declaration.type !== ApplicationCommandOptionType.Subcommand) {
+        return declaration;
+      }
+
+      const { options } = declaration;
+
+      return {
+        ...declaration,
+        options: options ? sortBy(options, opt => opt.required ? 0 : 1) : []
+      }
+    })
 })
