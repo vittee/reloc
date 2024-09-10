@@ -28,7 +28,7 @@ const declaration: APIApplicationCommandOption = {
       name: 'reason',
       description: 'Reason',
       type: ApplicationCommandOptionType.String,
-      required: false
+      required: true
     }
   ]
 }
