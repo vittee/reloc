@@ -22,7 +22,7 @@ const declaration: APIApplicationCommandOption = {
         name: `user${i + 1}`,
         description: `User ${i + 1}`,
         type: ApplicationCommandOptionType.User,
-        require: i === 0
+        required: i === 0
       })),
     {
       name: 'reason',
