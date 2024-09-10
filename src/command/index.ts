@@ -13,6 +13,7 @@ import marshal from "./commands/marshal";
 import kick from "./commands/kick";
 import move from "./commands/move";
 import { sortBy } from "lodash";
+import quit from "./commands/quit";
 
 export const descriptors = {
   kickAll,
@@ -22,7 +23,8 @@ export const descriptors = {
   annihilate,
   marshal,
   kick,
-  move
+  move,
+  quit
 }
 
 export const createCommandDeclarations = (baseCommand: string = 'reloc'): RESTPostAPIChatInputApplicationCommandsJSONBody => ({
