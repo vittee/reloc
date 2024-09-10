@@ -49,7 +49,7 @@ const commandHandler: InteractionHandler = async (interaction) => {
     .filter(m => !!m.voice.channelId);
 
   if (members.length === 0) {
-    interaction.reply(`The specified users were not found`);
+    interaction.reply(`The specified users were not found or not in a voice channel`);
     return;
   }
 
