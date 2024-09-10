@@ -4,6 +4,8 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody
 } from "discord.js";
 
+import { sortBy } from "lodash";
+
 import kickAll from "./commands/kick-all";
 import kickRole from "./commands/kick-role";
 import moveAll from "./commands/move-all";
@@ -12,7 +14,6 @@ import annihilate from "./commands/annihilate";
 import marshal from "./commands/marshal";
 import kick from "./commands/kick";
 import move from "./commands/move";
-import { sortBy } from "lodash";
 import quit from "./commands/quit";
 
 export const descriptors = {
