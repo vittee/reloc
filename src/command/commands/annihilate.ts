@@ -8,7 +8,7 @@ import {
 import { chain } from "lodash";
 import pluralize from "pluralize";
 
-import type { CommandDescriptor, InteractionHandler } from "../../command/types";
+import type { CommandDescriptor, InteractionHandlers } from "../../command/types";
 import { mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
@@ -31,7 +31,7 @@ const declaration: APIApplicationCommandOption = {
   ]
 }
 
-const commandHandler: InteractionHandler = async (interaction) => {
+const commandHandler: InteractionHandlers = async (interaction) => {
   if (!interaction.guild) {
     interaction.reply('Not in a guild');
     return;

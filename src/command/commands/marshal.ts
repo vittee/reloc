@@ -9,7 +9,7 @@ import {
 import { chain } from "lodash";
 import pluralize from "pluralize";
 
-import type { CommandDescriptor, InteractionHandler } from "../../command/types";
+import type { CommandDescriptor, InteractionHandlers } from "../../command/types";
 import { mentionUsers, orderGuildMembers } from "../../utils";
 
 const declaration: APIApplicationCommandOption = {
@@ -33,65 +33,67 @@ const declaration: APIApplicationCommandOption = {
   ]
 }
 
-const commandHandler: InteractionHandler = async (interaction) => {
-  if (!interaction.guild) {
-    interaction.reply('Not in a guild');
-    return;
-  }
-
-  const to = interaction.options.getChannel('to');
-  const toChannel = to
-    ? await interaction.client.channels.fetch(to.id)
-    : undefined;
-
-  if (!toChannel?.isVoiceBased()) {
-    interaction.reply('Invalid channel');
-    return;
-  }
-
-  const withBot = interaction.options.getBoolean('with-bot') ?? false;
-
-  const allChannels = await interaction.guild.channels.fetch().then(all => Array.from(all.values()));
-
-  const members = chain(allChannels)
-    .filter((c): c is VoiceBasedChannel => c?.isVoiceBased() ?? false)
-    .flatMap(c => Array.from(c.members.values()))
-    .filter(m => withBot || !m.user.bot)
-    .shuffle()
-    .sortBy(orderGuildMembers({
-      issuer: interaction.user,
-      reverse: false
-    }))
-    .value();
-
-  await interaction.deferReply();
-
-  const results: Array<GuildMember> = [];
-
-  for (const member of members) {
-    if (member.voice.channelId === toChannel.id) {
-      continue;
+const handlers: InteractionHandlers = {
+    command: async (interaction) => {
+    if (!interaction.guild) {
+      interaction.reply('Not in a guild');
+      return;
     }
 
-    const moved = await member.voice.setChannel(
-      toChannel,
-      `Demanded by ${interaction.user.username}`
-    ).catch(() => false as const);
+    const to = interaction.options.getChannel('to');
+    const toChannel = to
+      ? await interaction.client.channels.fetch(to.id)
+      : undefined;
 
-    if (moved !== false) {
-      results.push(moved);
+    if (!toChannel?.isVoiceBased()) {
+      interaction.reply('Invalid channel');
+      return;
     }
-  }
 
-  interaction.editReply([
-    `Moved ${pluralize('user', results.length, true)}`,
-    ...mentionUsers(results)
-  ].join('\n'));
+    const withBot = interaction.options.getBoolean('with-bot') ?? false;
+
+    const allChannels = await interaction.guild.channels.fetch().then(all => Array.from(all.values()));
+
+    const members = chain(allChannels)
+      .filter((c): c is VoiceBasedChannel => c?.isVoiceBased() ?? false)
+      .flatMap(c => Array.from(c.members.values()))
+      .filter(m => withBot || !m.user.bot)
+      .shuffle()
+      .sortBy(orderGuildMembers({
+        issuer: interaction.user,
+        reverse: false
+      }))
+      .value();
+
+    await interaction.deferReply();
+
+    const results: Array<GuildMember> = [];
+
+    for (const member of members) {
+      if (member.voice.channelId === toChannel.id) {
+        continue;
+      }
+
+      const moved = await member.voice.setChannel(
+        toChannel,
+        `Demanded by ${interaction.user.username}`
+      ).catch(() => false as const);
+
+      if (moved !== false) {
+        results.push(moved);
+      }
+    }
+
+    interaction.editReply([
+      `Moved ${pluralize('user', results.length, true)}`,
+      ...mentionUsers(results)
+    ].join('\n'));
+  }
 }
 
 const descriptor: CommandDescriptor = {
   declaration,
-  commandHandler
+  handlers
 }
 
 export default descriptor;

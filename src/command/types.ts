@@ -1,12 +1,15 @@
 import {
   type ChatInputCommandInteraction,
   type APIApplicationCommandOption,
-  type BaseInteraction
+  ModalSubmitInteraction
 } from "discord.js";
 
-export type InteractionHandler = (interaction: ChatInputCommandInteraction, ...args: any) => Promise<any>;
+export type InteractionHandlers = {
+  command: (interaction: ChatInputCommandInteraction, ...args: any) => Promise<any>;
+  modal?: (interaction: ModalSubmitInteraction, ...args: any) => Promise<any>;
+}
 
 export type CommandDescriptor = {
   declaration: APIApplicationCommandOption,
-  commandHandler: InteractionHandler;
+  handlers: InteractionHandlers;
 }
