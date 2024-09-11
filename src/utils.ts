@@ -18,7 +18,9 @@ import {
   roleMention,
   Routes,
   type User,
-  userMention
+  userMention,
+  type APIApplicationCommandNumberOption,
+  type APIApplicationCommandStringOption
 } from "discord.js";
 
 import { createCommandDeclarations } from "./command";
@@ -40,33 +42,63 @@ export function generateOAuth2Url(clientId: string) {
 }
 
 function isSubCommandOptionIdentical(a: APIApplicationCommandSubcommandOption, b: APIApplicationCommandSubcommandOption): string | true {
-  if (!a.options && !b.options) {
+  const opts_a = a.options ?? [];
+  const opts_b = b.options ?? [];
+
+  if (!opts_a && !opts_b) {
     return true;
   }
 
-  if (!a.options || !b.options) {
+  if (!opts_a || !opts_b) {
     return 'Options mismatch';
   }
 
-  if (a.options.length !== b.options.length) {
+  if (opts_a.length !== opts_b.length) {
     return 'Options size mismatch';
   }
 
-  for (let i = 0; i < a.options.length; i++) {
-    if (a.options[i].type !== b.options[i].type) {
+  for (let i = 0; i < opts_a.length; i++) {
+    const opt_a = opts_a[i];
+    const opt_b = opts_b[i];
+
+    if (opt_a.type !== opt_b.type) {
       return 'Option type mismatch';
     }
 
-    if (a.options[i].name !== b.options[i].name) {
+    if (opt_a.name !== opt_b.name) {
       return 'Option name mismatch';
     }
 
-    if (a.options[i].description !== b.options[i].description) {
+    if (opt_a.description !== opt_b.description) {
       return 'Option description mismatch';
     }
 
-    if ((a.options[i].required ?? false) !== (b.options[i].required ?? false)) {
+    if ((opt_a.required ?? false) !== (opt_b.required ?? false)) {
       return 'Option required flag mismatch';
+    }
+
+    if (opt_a.type === ApplicationCommandOptionType.Number || opt_a.type === ApplicationCommandOptionType.Integer) {
+      const opt_b_number = opt_b as APIApplicationCommandNumberOption;
+
+      if (opt_a.min_value !== opt_b_number.min_value) {
+        return 'Option min_value mismatch';
+      }
+
+      if (opt_a.max_value !== opt_b_number.max_value) {
+        return 'Option max_value mismatch';
+      }
+    }
+
+    if (opt_a.type === ApplicationCommandOptionType.String) {
+      const opt_b_str = opt_b as APIApplicationCommandStringOption;
+
+      if (opt_a.min_length !== opt_b_str.min_length) {
+        return 'Option min_length mismatch';
+      }
+
+      if (opt_a.max_length !== opt_b_str.max_length) {
+        return 'Option max_value mismatch';
+      }
     }
   }
 
