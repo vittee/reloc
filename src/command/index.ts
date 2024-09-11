@@ -25,6 +25,7 @@ export const descriptors = {
   marshal,
   kick,
   move,
+  ...quit,
 }
 
 export const createCommandDeclarations = (baseCommand: string = 'reloc'): RESTPostAPIChatInputApplicationCommandsJSONBody => ({
