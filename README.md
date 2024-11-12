@@ -148,7 +148,7 @@ Disconnect up to 10 users from all voice channels.
 - `reason` **(optional)** - The reason for the disconnection
 
 ### `move`
-Disconnect up to 10 users from all voice channels.
+Move up to 10 users into a new voice channel
 
 ```
 /reloc move
@@ -157,6 +157,14 @@ Disconnect up to 10 users from all voice channels.
 #### Arguments
 - `to` **(required)** - A voice channel to which users will be moved into
 - `user1`...`user10`  - List of users to be disconnected, at least `user1` must be specified
+
+### `quit`
+Kick yourself.
+
+This is useful to leave a message when leaving from a voice channel.
+
+### `protect`
+Protect yourself from being kicked, the duration for the protection is random.
 
 # Authors
 - [Wittawas Nakkasem (vittee)](https://github.com/vittee)
