@@ -121,11 +121,10 @@ const handlers: InteractionHandlers = {
         ...scene,
         permissions,
         messageId,
-        quitTime,
         abortController
       });
 
-      const aborted = await wait(millisec,undefined, { signal: abortController.signal })
+      const aborted = await wait(millisec, undefined, { signal: abortController.signal })
         .then(() => false)
         .catch(() => true);
 
@@ -133,7 +132,7 @@ const handlers: InteractionHandlers = {
         return;
       }
 
-      deleteTask(scene.userId);
+      deleteTask(scene.guildId, scene.userId);
 
       const guild = await interaction.client.guilds.fetch(scene.guildId);
       const channel = await guild.channels.fetch(scene.channelId);

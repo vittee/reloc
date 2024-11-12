@@ -19,7 +19,7 @@ const handlers: InteractionHandlers = {
       return;
     }
 
-    const aborted = await abortTask(interaction.client, interaction.user.id);
+    const aborted = await abortTask(interaction.client, interaction.guild.id, interaction.user.id);
 
     interaction.reply(
       aborted ? 'OK, Aborted' : 'Nothing to abort'

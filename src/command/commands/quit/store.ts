@@ -1,4 +1,4 @@
-import { Client, User } from "discord.js";
+import type { Client, Guild, User } from "discord.js";
 import { noop } from "lodash";
 
 type StoreInfo = {
@@ -11,23 +11,24 @@ type StoreInfo = {
     sendMessage?: boolean;
   },
   messageId: string;
-  quitTime: number;
   abortController: AbortController;
 }
 
-const store = new Map<User['id'], StoreInfo>();
+type StoreId = `${Guild['id']}:${User['id']}`;
 
-export async function abortTask(client: Client, userId: string) {
-  const task = store.get(userId);
+const store = new Map<StoreId, StoreInfo>();
+
+export async function abortTask(client: Client, guildId: Guild['id'], userId: User['id']) {
+  const storeId = `${guildId}:${userId}` satisfies StoreId;
+  const task = store.get(storeId);
 
   if (!task) {
     return false;
   }
 
-  deleteTask(userId);
+  deleteTask(guildId, userId);
 
   const {
-    guildId,
     channelId,
     abortController,
     messageId,
@@ -49,10 +50,10 @@ export async function abortTask(client: Client, userId: string) {
 }
 
 export async function saveTask(client: Client, info: StoreInfo) {
-  await abortTask(client, info.userId);
-  store.set(info.userId, info);
+  await abortTask(client, info.guildId, info.userId);
+  store.set(`${info.guildId}:${info.userId}`, info);
 }
 
-export function deleteTask(userId: string) {
-  store.delete(userId);
+export function deleteTask(guildId: Guild['id'], userId: User['id']) {
+  store.delete(`${guildId}:${userId}`);
 }
