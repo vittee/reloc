@@ -3,7 +3,8 @@ import {
   type APIApplicationCommandRoleOption,
   ApplicationCommandOptionType,
   GuildMember,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  userMention
 } from "discord.js";
 
 import { chain, range } from "lodash";
@@ -12,6 +13,7 @@ import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandlers } from "../types";
 import { fetchCommandRoles, mentionRoles, mentionUsers, orderGuildMembers } from "../../utils";
+import { isProtected } from "./protect";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-role',
@@ -59,7 +61,7 @@ const handlers: InteractionHandlers = {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
       const adminRoles = roles.filter(role => role.permissions.has(PermissionFlagsBits.Administrator));
 
-      if (adminRoles) {
+      if (adminRoles.length) {
         interaction.reply(`You do not have permissions for ${mentionRoles(adminRoles)}`);
         return;
       }
@@ -67,7 +69,7 @@ const handlers: InteractionHandlers = {
 
     const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-    const members = chain(roles)
+    const [protectedMembers, members] = chain(roles)
       .flatMap(role => Array.from(role.members.values()))
       .filter(m => withBot || !m.user.bot)
       .shuffle()
@@ -75,9 +77,10 @@ const handlers: InteractionHandlers = {
         issuer: interaction.user,
         reverse: true
       }))
+      .partition(m => isProtected(m.guild.id, m.user.id))
       .value();
 
-    if (members.length === 0) {
+    if ((members.length + protectedMembers.length) === 0) {
       interaction.reply(`No users of role ${mentionRoles(roles)} in any voice channels`);
       return;
     }
@@ -97,10 +100,17 @@ const handlers: InteractionHandlers = {
       }
     }
 
-    interaction.editReply([
+    await interaction.editReply([
       `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
       ...mentionUsers(results)
     ].join('\n'));
+
+    if (protectedMembers.length) {
+      interaction.followUp([
+        `The following ${pluralize('user', protectedMembers.length)} ${protectedMembers.length === 1 ? 'is' : 'are' } being protected`,
+        protectedMembers.map(m => userMention(m.id)).join('')
+      ].join('\n'));
+    }
   }
 }
 

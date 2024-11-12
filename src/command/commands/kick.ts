@@ -3,7 +3,8 @@ import {
   type APIApplicationCommandUserOption,
   ApplicationCommandOptionType,
   User,
-  GuildMember
+  GuildMember,
+  userMention
 } from "discord.js";
 
 import { chain, range } from "lodash";
@@ -11,6 +12,7 @@ import { chain, range } from "lodash";
 import type { CommandDescriptor, InteractionHandlers } from "../../command/types";
 import { mentionUsers } from "../../utils";
 import pluralize from "pluralize";
+import { isProtected } from "./protect";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick',
@@ -46,10 +48,12 @@ const handlers: InteractionHandlers = {
       .uniqBy(u => u.id)
       .value();
 
-    const members = Array.from((await interaction.guild.members.fetch({ user: users })).values())
-      .filter(m => !!m.voice.channelId);
+    const [protectedMembers, members] = chain(Array.from((await interaction.guild.members.fetch({ user: users })).values()))
+      .filter(m => !!m.voice.channelId)
+      .partition(m => isProtected(m.guild.id, m.user.id))
+      .value();
 
-    if (members.length === 0) {
+    if ((members.length + protectedMembers.length) === 0) {
       interaction.reply(`The specified users were not found or not in a voice channel`);
       return;
     }
@@ -68,10 +72,17 @@ const handlers: InteractionHandlers = {
 
     const reason = interaction.options.getString('reason');
 
-    interaction.editReply([
+    await interaction.editReply([
       `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
       ...mentionUsers(results)
     ].join('\n'));
+
+    if (protectedMembers.length) {
+      interaction.followUp([
+        `The following ${pluralize('user', protectedMembers.length)} ${protectedMembers.length === 1 ? 'is' : 'are' } being protected`,
+        protectedMembers.map(m => userMention(m.id)).join('')
+      ].join('\n'));
+    }
   }
 }
 

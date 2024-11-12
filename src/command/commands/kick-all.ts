@@ -3,7 +3,8 @@ import {
   type APIApplicationCommandOption,
   ApplicationCommandOptionType,
   ChannelType,
-  GuildMember
+  GuildMember,
+  userMention
 } from "discord.js";
 
 import { chain, range } from "lodash";
@@ -12,6 +13,7 @@ import pluralize from "pluralize";
 
 import type { CommandDescriptor, InteractionHandlers } from "../../command/types";
 import { fetchCommandVoiceChannels, mentionChannels, mentionUsers, orderGuildMembers } from "../../utils";
+import { isProtected } from "./protect";
 
 const declaration: APIApplicationCommandOption = {
   name: 'kick-all',
@@ -54,7 +56,7 @@ const handlers: InteractionHandlers = {
 
     const withBot = interaction.options.getBoolean('with-bot') ?? false;
 
-    const members = chain(channels)
+    const [protectedMembers, members] = chain(channels)
       .flatMap(c => Array.from(c.members.values()))
       .filter(m => withBot || !m.user.bot)
       .shuffle()
@@ -62,9 +64,10 @@ const handlers: InteractionHandlers = {
         issuer: interaction.user,
         reverse: true
       }))
+      .partition(m => isProtected(m.guild.id, m.user.id))
       .value();
 
-    if (members.length === 0) {
+    if ((members.length + protectedMembers.length) === 0) {
       interaction.reply(`No users in ${mentionChannels(channels).join(' ')}`);
       return;
     }
@@ -84,10 +87,17 @@ const handlers: InteractionHandlers = {
       }
     }
 
-    interaction.editReply([
+    await interaction.editReply([
       `Disconnected ${pluralize('user', results.length, true)}${reason ? ` (Reason: ${reason})`: ''}`,
       ...mentionUsers(results)
     ].join('\n'));
+
+    if (protectedMembers.length) {
+      interaction.followUp([
+        `The following ${pluralize('user', protectedMembers.length)} ${protectedMembers.length === 1 ? 'is' : 'are' } being protected`,
+        protectedMembers.map(m => userMention(m.id)).join('')
+      ].join('\n'));
+    }
   }
 }
 
