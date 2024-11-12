@@ -66,7 +66,7 @@ const handlers: InteractionHandlers = {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
       const adminRoles = roles.filter(role => role.permissions.has(PermissionFlagsBits.Administrator));
 
-      if (adminRoles) {
+      if (adminRoles.length) {
         interaction.reply(`You do not have permissions for ${mentionRoles(adminRoles)}`);
         return;
       }
