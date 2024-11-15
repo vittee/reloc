@@ -23,8 +23,8 @@ export function addProtection(client: Client, guildId: Guild['id'], userId: User
   const result = {
     guildId,
     userId,
-    expires: clamp(Math.max(expires, protection?.expires ?? 0), 0, maxCredits ?? 10),
-    credits: (protection?.credits ?? 0) + 1
+    expires: Math.max(expires, protection?.expires ?? 0),
+    credits: clamp((protection?.credits ?? 0) + 1, 0, maxCredits ?? 10)
   }
 
   protections.set(key, result);
