@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType, type APIApplicationCommandOption, time as formatTime } from "discord.js";
-import { random } from "lodash";
+import pluralize from 'pluralize';
 import type { CommandDescriptor, InteractionHandlers } from "../../types";
 import { addProtection, cleanProtections } from "./protection";
 
@@ -9,20 +9,12 @@ const commandHandler: InteractionHandlers['command'] = async (interaction) => {
     return;
   }
 
-  const timeout = random(1, 12 + 1) * 5;
-
-  const expires = Date.now() + (timeout * 60 * 1000);
-  const until = Math.ceil(expires / 1000);
+  const protection = addProtection(interaction.client, interaction.guildId!, interaction.user.id);
+  const until = Math.ceil(protection.expires / 1000);
 
   await interaction.reply({
-    content: `You're now under my protection until ${formatTime(until, 'T')}`,
+    content: `You're now under my protection until ${formatTime(until, 'T')}, with ${pluralize('credit', protection.credits, true)}`,
     ephemeral: true
-  });
-
-  addProtection(interaction.client, {
-    guildId: interaction.guildId!,
-    userId: interaction.user.id,
-    expires
   });
 }
 

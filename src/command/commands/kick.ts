@@ -50,7 +50,7 @@ const handlers: InteractionHandlers = {
 
     const [protectedMembers, members] = chain(Array.from((await interaction.guild.members.fetch({ user: users })).values()))
       .filter(m => !!m.voice.channelId)
-      .partition(m => isProtected(m.guild.id, m.user.id))
+      .partition(m => isProtected(m.guild.id, m.user.id, true))
       .value();
 
     if ((members.length + protectedMembers.length) === 0) {

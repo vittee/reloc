@@ -53,7 +53,7 @@ const handlers: InteractionHandlers = {
         issuer: interaction.user,
         reverse: true
       }))
-      .partition(m => isProtected(m.guild.id, m.user.id))
+      .partition(m => isProtected(m.guild.id, m.user.id, true))
       .value();
 
     const reason = interaction.options.getString('reason');

@@ -1,32 +1,67 @@
 import type { Client, Guild, User } from "discord.js";
+import { clamp, random } from "lodash";
 
 type Protection = {
   guildId: string;
   userId: string;
   expires: number;
+  credits: number;
 }
 
 type ProtectionId = `${Guild['id']}:${User['id']}`;
 
 const protections = new Map<ProtectionId, Protection>();
 
-export async function addProtection(client: Client, protection: Protection) {
-  protections.set(`${protection.guildId}:${protection.userId}`, protection);
+export function addProtection(client: Client, guildId: Guild['id'], userId: User['id'], maxCredits?: number): Protection {
+  const key = `${guildId}:${userId}` satisfies ProtectionId;
+
+  const protection = protections.get(key);
+
+  const timeout = random(1, 12 + 1) * 5;
+  const expires = Date.now() + (timeout * 60 * 1000);
+
+  const result = {
+    guildId,
+    userId,
+    expires: clamp(Math.max(expires, protection?.expires ?? 0), 0, maxCredits ?? 10),
+    credits: (protection?.credits ?? 0) + 1
+  }
+
+  protections.set(key, result);
+
+  return result;
 }
 
 export function deleteProtection(guildId: Guild['id'], userId: User['id']) {
-  const id = `${guildId}:${userId}` satisfies ProtectionId;
+  const key = `${guildId}:${userId}` satisfies ProtectionId;
 
-  if (!protections.has(id)) {
+  if (!protections.has(key)) {
     return false;
   }
 
-  protections.delete(id);
+  protections.delete(key);
   return true;
 }
 
-export function isProtected(guildId: Guild['id'], userId: User['id']) {
-  return protections.has(`${guildId}:${userId}`);
+export function isProtected(guildId: Guild['id'], userId: User['id'], useCredit: boolean) {
+  const key = `${guildId}:${userId}` satisfies ProtectionId;
+
+  if (protections.has(key)) {
+    if (useCredit) {
+      const protection = protections.get(key)!
+      protection.credits--;
+
+      if (protection.credits <= 0) {
+        protections.delete(key);
+      } else {
+        protections.set(key, protection);
+      }
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 export function cleanProtections() {
